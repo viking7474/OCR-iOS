@@ -12,7 +12,7 @@ SDK_IPHONESIMULATOR_PATH=$(shell xcrun --sdk iphonesimulator --show-sdk-path)
 ARCHS = arm64 arm64-simulator x86_64-simulator
 
 # Common build configuration
-COMMON_FLAGS = -pipe -no-cpp-precomp -miphoneos-version-min=15.0 -O2
+COMMON_FLAGS = -pipe -no-cpp-precomp -miphoneos-version-min=13.0 -O2
 
 # Library configurations
 JPEG_SRC_NAME = jpegsrc.v9a
@@ -77,19 +77,19 @@ endef
 define SIMULATOR_FLAGS
 	export SDKROOT=$(SDK_IPHONESIMULATOR_PATH); \
 	export HOST=$${arch%%-simulator}-apple-darwin; \
-	export CFLAGS="$(COMMON_FLAGS) -arch $${arch%%-simulator} -isysroot $$SDKROOT -target $${arch%%-simulator}-apple-ios15.0-simulator"; \
+	export CFLAGS="$(COMMON_FLAGS) -arch $${arch%%-simulator} -isysroot $$SDKROOT -target $${arch%%-simulator}-apple-ios13.0-simulator"; \
 	export LDFLAGS="-arch $${arch%%-simulator} -L$$SDKROOT/usr/lib/"
 endef
 
 define DEVICE_FLAGS
 	export SDKROOT=$(SDK_IPHONEOS_PATH); \
 	export HOST=$$arch-apple-darwin; \
-	export CFLAGS="$(COMMON_FLAGS) -arch $$arch -isysroot $$SDKROOT -target $$arch-apple-ios15.0"; \
+	export CFLAGS="$(COMMON_FLAGS) -arch $$arch -isysroot $$SDKROOT -target $$arch-apple-ios13.0"; \
 	export LDFLAGS="-arch $$arch -L$$SDKROOT/usr/lib/"
 endef
 
 # Targets
-.PHONY: all build frameworks jpeg png tiff leptonica tesseract autogen-tesseract xcframeworks jpeg-xcframework png-xcframework tiff-xcframework leptonica-xcframework tesseract-xcframework clean clean-jpeg clean-png clean-tiff clean-leptonica clean-tesseract distclean-tesseract clean-frameworks clean-all tesseract-ocr tesseract-ocr-archives tesseract-ocr-xcframework
+.PHONY: all build frameworks jpeg png tiff leptonica tesseract autogen-leptonica autogen-tesseract xcframeworks jpeg-xcframework png-xcframework tiff-xcframework leptonica-xcframework tesseract-xcframework clean clean-jpeg clean-png clean-tiff clean-leptonica clean-tesseract distclean-tesseract clean-frameworks clean-all tesseract-ocr tesseract-ocr-archives tesseract-ocr-xcframework
 
 all: build frameworks
 
@@ -220,7 +220,13 @@ $(TIFF_SRC)/configure:
 	curl -L https://download.osgeo.org/libtiff/$(TIFF_NAME).tar.gz | tar -xpf-
 
 # Leptonica target
-leptonica: clean-leptonica jpeg png tiff
+autogen-leptonica:
+	@cd $(LEPTON_SRC) && \
+	if [ ! -f configure ]; then \
+		./autogen.sh; \
+	fi
+
+leptonica: clean-leptonica autogen-leptonica jpeg png tiff
 	@echo "Building Leptonica for architectures: $(ARCHS)"
 	@for arch in $(ARCHS); do \
 		echo "Building Leptonica for $$arch"; \
@@ -296,6 +302,7 @@ tesseract: clean-tesseract autogen-tesseract leptonica
 			--disable-doc \
 			--disable-openmp \
 			--with-pic \
+			--without-archive \
 			LEPTONICA_LIBS="$$LEPTONICA_LIBS" \
 			LEPTONICA_CFLAGS="$$LEPTONICA_CFLAGS" || exit 1; \
 		echo "Building Tesseract for $$arch"; \
