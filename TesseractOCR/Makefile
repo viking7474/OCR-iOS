@@ -89,7 +89,7 @@ define DEVICE_FLAGS
 endef
 
 # Targets
-.PHONY: all build frameworks jpeg png tiff leptonica tesseract autogen-tesseract xcframeworks jpeg-xcframework png-xcframework tiff-xcframework leptonica-xcframework tesseract-xcframework clean clean-jpeg clean-png clean-tiff clean-leptonica clean-tesseract distclean-tesseract clean-frameworks clean-all tesseract-ocr tesseract-ocr-archives tesseract-ocr-xcframework
+.PHONY: all build frameworks jpeg png tiff leptonica tesseract autogen-leptonica autogen-tesseract xcframeworks jpeg-xcframework png-xcframework tiff-xcframework leptonica-xcframework tesseract-xcframework clean clean-jpeg clean-png clean-tiff clean-leptonica clean-tesseract distclean-tesseract clean-frameworks clean-all tesseract-ocr tesseract-ocr-archives tesseract-ocr-xcframework
 
 all: build frameworks
 
@@ -220,7 +220,13 @@ $(TIFF_SRC)/configure:
 	curl -L https://download.osgeo.org/libtiff/$(TIFF_NAME).tar.gz | tar -xpf-
 
 # Leptonica target
-leptonica: clean-leptonica jpeg png tiff
+autogen-leptonica:
+	@cd $(LEPTON_SRC) && \
+	if [ ! -f configure ]; then \
+		./autogen.sh; \
+	fi
+
+leptonica: clean-leptonica autogen-leptonica jpeg png tiff
 	@echo "Building Leptonica for architectures: $(ARCHS)"
 	@for arch in $(ARCHS); do \
 		echo "Building Leptonica for $$arch"; \
