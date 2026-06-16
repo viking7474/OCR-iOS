@@ -12,7 +12,7 @@ SDK_IPHONESIMULATOR_PATH=$(shell xcrun --sdk iphonesimulator --show-sdk-path)
 ARCHS = arm64 arm64-simulator x86_64-simulator
 
 # Common build configuration
-COMMON_FLAGS = -pipe -no-cpp-precomp -miphoneos-version-min=15.0 -O2
+COMMON_FLAGS = -pipe -no-cpp-precomp -miphoneos-version-min=13.0 -O2
 
 # Library configurations
 JPEG_SRC_NAME = jpegsrc.v9a
@@ -77,14 +77,14 @@ endef
 define SIMULATOR_FLAGS
 	export SDKROOT=$(SDK_IPHONESIMULATOR_PATH); \
 	export HOST=$${arch%%-simulator}-apple-darwin; \
-	export CFLAGS="$(COMMON_FLAGS) -arch $${arch%%-simulator} -isysroot $$SDKROOT -target $${arch%%-simulator}-apple-ios15.0-simulator"; \
+	export CFLAGS="$(COMMON_FLAGS) -arch $${arch%%-simulator} -isysroot $$SDKROOT -target $${arch%%-simulator}-apple-ios13.0-simulator"; \
 	export LDFLAGS="-arch $${arch%%-simulator} -L$$SDKROOT/usr/lib/"
 endef
 
 define DEVICE_FLAGS
 	export SDKROOT=$(SDK_IPHONEOS_PATH); \
 	export HOST=$$arch-apple-darwin; \
-	export CFLAGS="$(COMMON_FLAGS) -arch $$arch -isysroot $$SDKROOT -target $$arch-apple-ios15.0"; \
+	export CFLAGS="$(COMMON_FLAGS) -arch $$arch -isysroot $$SDKROOT -target $$arch-apple-ios13.0"; \
 	export LDFLAGS="-arch $$arch -L$$SDKROOT/usr/lib/"
 endef
 
@@ -296,6 +296,7 @@ tesseract: clean-tesseract autogen-tesseract leptonica
 			--disable-doc \
 			--disable-openmp \
 			--with-pic \
+			--without-archive \
 			LEPTONICA_LIBS="$$LEPTONICA_LIBS" \
 			LEPTONICA_CFLAGS="$$LEPTONICA_CFLAGS" || exit 1; \
 		echo "Building Tesseract for $$arch"; \
