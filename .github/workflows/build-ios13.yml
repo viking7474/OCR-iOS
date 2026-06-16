@@ -44,3 +44,9 @@ jobs:
       - name: Verify no archive symbols
         run: |
           ! nm -u TesseractOCR/xcframework/Tesseract.xcframework/ios-arm64/libtesseract.a | grep archive
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Tesseract-XCFrameworks
+          path: TesseractOCR/xcframework/
